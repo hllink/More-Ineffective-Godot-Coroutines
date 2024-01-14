@@ -1,6 +1,7 @@
 ﻿using Godot;
 using System;
 using System.Collections.Generic;
+using static MEC.Timing;
 
 // /////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1781,7 +1782,7 @@ namespace MEC
         {
             yield return WaitForSecondsOnInstance(delay);
 
-            if (ReferenceEquals(cancelWith, null) || cancelWith != null)
+            if (cancelWith == null || IsNodeAlive(cancelWith))
                 action();
         }
 
@@ -2044,6 +2045,15 @@ namespace MEC
                 onDone(reference);
         }
 
+        /// <summary>
+        /// Checks whether a node exists, has not been deleted, and is in a tree
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsNodeAlive(Node node)
+        {
+            return node != null && Node.IsInstanceValid(node) && !node.IsQueuedForDeletion() && node.IsInsideTree();
+        }
+
         private struct ProcessIndex : System.IEquatable<ProcessIndex>
         {
             public Segment seg;
@@ -2245,14 +2255,5 @@ public static class MECExtensionMethods2
     {
         while (MEC.Timing.MainThread != System.Threading.Thread.CurrentThread || (IsNodeAlive(node1) && IsNodeAlive(node2) && IsNodeAlive(node3) && coroutine.MoveNext()))
             yield return coroutine.Current;
-    }
-
-    /// <summary>
-    /// Checks whether a node exists, has not been deleted, and is in a tree
-    /// </summary>
-    /// <returns></returns>
-    private static bool IsNodeAlive(Node node)
-    {
-        return node != null && !node.IsQueuedForDeletion() && node.IsInsideTree();
     }
 }
