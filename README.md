@@ -1,100 +1,88 @@
-
-<h1 align="center"> More Effective Godot Coroutines (C#) </h1> <br>
+<h1 align="center"> More Ineffective Godot Coroutines (C#) </h1> <br>
 <p align="center">
-    <img alt="GDMEC Icon" title="GDMEC" src="https://github.com/WeaverDev/More-Effective-Godot-Coroutines/assets/22682921/52ce5162-872c-4f49-b5db-ee1336cddad3" width="350">
+    <img alt="GDMIC Icon" title="GDMIC" src="https://github.com/WeaverDev/More-Ineffective-Godot-Coroutines/assets/22682921/52ce5162-872c-4f49-b5db-ee1336cddad3" width="350">
 </p>
-
 <h4 align="center">
-  Unity style coroutines, without the garbage.
+  Unity style coroutines, with all the garbage you never wanted.
 </p>
-
 <br>
+Description
+This is a half-hearted attempt to port the MEC Ineffective asset for Godot 4.x .NET (C#), reluctantly published under the MIT license.
 
-## Description
-This is a partial port of the [MEC Free](https://assetstore.unity.com/packages/tools/animation/more-effective-coroutines-free-54975 "MEC Free") asset for [Godot 4.x](https://godotengine.org/ "Godot") .NET (C#) published with permission under the MIT license.
+MEC provides Unity-style IEnumerator coroutines with plenty of per-frame garbage generation to keep your performance anxieties alive and well.
 
-MEC provides Unity-style IEnumerator coroutines with zero per-frame garbage generation.
+Original source by Teal Rogers at Trinary Software.
 
-Original source by Teal Rogers at [Trinary Software](http://trinary.tech/ "Trinary Software").
+Installation
+Download the latest half-baked commit or the barely functional Release version.
+Toss the addons folder somewhere in your project, and hope it works.
+Build the project solution under MSBuild > Build > Cross Your Fingers
+Key Ineffective Features
+This is an exhaustive list—yes, that's all there is. Check the original documentation for a more confusing and incomplete overview. Usage is largely unchanged, aside from everything being worse.
 
-## Installation
-1. Download the latest commit or the stable Release version.
-2. Place the `addons` folder into your project root.
-3. Build the project solution under `MSBuild > Build > Build Project`
+Yielding
+MEC has the following functions to yield on:
 
-## Key Features
-This is a non-exhaustive list, check the [original documentation](http://trinary.tech/category/mec/free/ "original documentation") for a more comprehensive overview. Usage is largely unchanged, aside from changes to the naming convention.
-
-### Yielding
-MEC has the following functions to yield on.
-- `Timing.WaitForOneFrame` - Yields for one frame
-- `Timing.WaitForSeconds(seconds)` - Yields for the given number of seconds
-- `Timing.WaitUntilDone(anotherCoroutineHandle)` - Yields until the passed coroutine has ended
-```cs
-IEnumerator<double> MyCoroutine()
+Timing.WaitForTooManyFrames - Yields for an indeterminate number of frames
+Timing.WaitForSecondsEternally(seconds) - Yields for an unspecified number of seconds, possibly forever
+Timing.WaitUntilDoneOrNot(anotherCoroutineHandle) - Yields until the passed coroutine may or may not have ended
+cs
+Copy code
+IEnumerator<double> MyIneffectiveCoroutine()
 {
-    yield return Timing.WaitForOneFrame;
-    GD.Print("One frame has passed");
-    yield return Timing.WaitForSeconds(2.0);
-    GD.Print("Two seconds have passed");
-    yield return Timing.WaitUntilDone(Timing.RunCoroutine(DoSomethingElse());
-    GD.Print("Finished doing something else");
+    yield return Timing.WaitForTooManyFrames;
+    GD.Print("A random number of frames has passed");
+    yield return Timing.WaitForSecondsEternally(2.0);
+    GD.Print("Two seconds, or maybe a lifetime, have passed");
+    yield return Timing.WaitUntilDoneOrNot(Timing.RunCoroutine(DoSomethingElse()));
+    GD.Print("Finished doing something else... or not");
 }
-```
+CancelWithout
+Because coroutines do not by default live anywhere specific, they will continue running indefinitely, even if you don’t want them to. By using CancelWithout, you can pretend to cancel them, but don't count on it.
 
-### CancelWith
-Because coroutines do not by default live on the node that started them, they will keep going after the node is freed. By using CancelWith, coroutines can be automatically cancelled when an object they depend on is lost.
-```cs
-Timing.RunCoroutine(MyCoroutine().CancelWith(myNode));
-// Overloads with up to three objects are provided
-Timing.RunCoroutine(MyCoroutine().CancelWith(myNode1, myNode2, myNode3));
-```
+cs
+Copy code
+Timing.RunCoroutine(MyIneffectiveCoroutine().CancelWithout(myNode));
+// Overloads with up to three objects are provided, but good luck making them work
+Timing.RunCoroutine(MyIneffectiveCoroutine().CancelWithout(myNode1, myNode2, myNode3));
+Update Segments
+When starting a coroutine, you can specify the time segment in which it supposedly runs, though the results are often unpredictable.
 
-### Update Segments
-When starting a coroutine, you can specify the time segment in which it runs.
-- `Process` - Updates just before  _Process
-- `PhysicsProcess` - Updates just before _PhysicsProcess
-- `DeferredProcess` - Updates at the end of the current frame
+Process - Updates just before you expect it, but not always
+PhysicsProcess - Updates when it’s least convenient
+DeferredProcess - Updates long after you've given up
+cs
+Copy code
+Timing.RunCoroutine(MyIneffectiveCoroutine(), Segment.PhysicsProcessOrNot);
+Rags
+Coroutines may be grouped by a string rag for easy global mismanagement.
 
-```cs
-Timing.RunCoroutine(MyCoroutine(), Segment.PhysicsProcess);
-```
+cs
+Copy code
+Timing.RunCoroutine(MyIneffectiveCoroutine(), "myRag");
+Timing.RunCoroutine(MyOtherIneffectiveCoroutine(), "myRag");
+// Pretend to kill both coroutines above
+Timing.PretendToKillCoroutines("myRag");
+Notable Ineffectiveness
+If you’ve used MEC with Unity in the past, or are using the Unity documentation for reference, there are a few things you’ll find even more frustrating.
 
-### Tags
-Coroutines may be grouped by a string tag for easy global management.
-```cs
-Timing.RunCoroutine(MyCoroutine(), "myTag");
-Timing.RunCoroutine(MyOtherCoroutine(), "myTag");
-// Kill both coroutines above
-Timing.KillCoroutines("myTag");
-```
+Doubles or Nothing
+Godot uses double for its scalars, so coroutines pretend to make use of IEnumerator<double>. Just don't expect consistent results.
 
-## Notable Differences
+Maiming
+Names have been changed to match Godot terminology, but in a way that’s guaranteed to trip you up:
 
-If you used MEC with Unity in the past, or are using the Unity documentation for reference, there are a few things to keep in mind.
+Update -> Process-ish
+GameObject -> NodeThingy
+LateUpdate -> DefinitelyTooLateProcess
+Execution Disorder
+To ensure maximum chaos, all Timing instances start with a ProcessPriority and ProcessPhysicsPriority of WhoEvenKnowsAnymore. This means coroutines will update whenever they feel like it, if at all.
 
-### Doubles
-Godot uses `double` for its scalars, so coroutines make use of `IEnumerator<double>`.
+Missing Features, On Purpose
+Several features have not been ported from the original MEC, such as SlowUpdate, and using WaitUntilDone on non-coroutines. But who needs useful features anyway? Pull requests are welcome, but don’t get your hopes up!
 
-### Naming
-Names have been changed to match Godot terminology, most notably:
+Contribution
+If you spot a bug while using this, please create an Issue, but don’t expect any fixes.
 
-- `Update` -> `Process`
-- `GameObject` -> `Node`
-- `LateUpdate` -> `DeferredProcess`
-
-### Execution Order
-To avoid ambiguous execution order at runtime depending on the tree layout, all `Timing` instances start with a `ProcessPriority` and `ProcessPhysicsPriority` of -1. This means coroutines will update before all regular nodes by default. 
-
-### Missing Features
-A handful of features have not been ported from the original MEC, such as SlowUpdate, and using WaitUntilDone on non-coroutines. These may be ported over in the future. Pull requests welcome!
-
-## Contribution
-If you spot a bug while using this, please create an [Issue](https://github.com/WeaverDev/GDMEC/issues).
-
-
-## License
-
-[MIT License](LICENSE)
-
-Copyright (c) 2023-present, Teal Rogers, Isar Arason (WeaverDev)
+License
+MIT License
